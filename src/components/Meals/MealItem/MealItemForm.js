@@ -1,28 +1,45 @@
-import React , {useContext} from 'react'
+import React  from 'react'
+import {useRef, useState} from 'react'
 import classes from "./MealItemForm.module.css"
 import Input from '../../UI/Input'
-import Cartcntx from "../../../store/cart-context"
 
 const MealItemForm = (props) => {
-    const cartcntx =  useContext(Cartcntx)
+    const [amountIsValid,setAmountIsValid] = useState(true);
+    const amountInputRef = useRef();
 
-    const addItemToCart = (event) => {
+    const submitHandler = (event) => {
       event.preventDefault();
-      const quantity = document.getElementById("amount" + props.id).value
-      cartcntx.addItem({...props.item,quantity : quantity})
+      
+      const enteredAmount = amountInputRef.current.value;
+      const enteredAmountNumber= +enteredAmount;
 
+      if(
+        enteredAmount.trim().length === 0 || 
+        enteredAmountNumber < 1 || 
+        enteredAmountNumber > 5
+       ) {
+        setAmountIsValid(false)
+        return;
+      }
+
+      props.onAddToCart(enteredAmountNumber);
     }
+  
   return (
-    <form className={classes.form}>
-        <Input label="Amount" input ={{ 
-            id:"amount" + props.id,
+    <form className={classes.form} onSubmit={submitHandler}>
+        <Input 
+        ref={amountInputRef}
+        label ="Amount" 
+        input ={{ 
+            id:"amount",
             type:"number",
             min:"1",
             max:"5",
             step:"1",
             defaultValue:"1",
             }}/>
-        <button onClick = {addItemToCart}>+ add</button>
+        <button>+ add</button>
+        {!amountIsValid && <p>Please enter a valid amount(1-5).</p>}
     </form>
   )
 }
